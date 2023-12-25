@@ -1,9 +1,9 @@
 require 'colorator'
-require_relative 'stabilize_video/version'
+require_relative 'video_operations/version'
 require_relative 'options'
 
 # Require all Ruby files in 'lib/', except this file
-Dir[File.join(__dir__, '*.rb')].sort.each do |file|
+Dir[File.join(__dir__, '*.rb')].each do |file|
   require file unless file.end_with?('/common.rb')
 end
 
@@ -20,6 +20,9 @@ def rotate
   degrees = ARGV[1].to_f
   video_out = "#{File.dirname video_in}/rotated_#{File.basename video_in}"
   VideoOperations.new(video_in, video_out, **@options).rotate(degrees)
+rescue NoMethodError => e
+  printf "Error: #{e.message} (perhaps you did not provide a numeric value for the rotation degrees?)"
+  exit 4
 end
 
 def stabilize

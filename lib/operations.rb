@@ -104,6 +104,24 @@ class VideoOperations
     "smoothing=#{result.to_i}"
   end
 
+  def flip(hflip: false, vflip: true)
+    flips = 'hflip' if hflip
+    flips += ',' if hflip && vflip
+    flips += 'vflip' if vflip
+    command = <<~END_CMD
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf '#{flips}' "#{@video_out}"
+    END_CMD
+    run command
+  end
+
+  def rotate(degrees)
+    rotation = if degrees % 90 == 0 ? "PI*#{degrees / 90}:bilinear=0" : "#{degrees}*(PI/180)"
+    command = <<~END_CMD
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf 'rotate=#{rotation} "#{@video_out}"
+    END_CMD
+    run command
+  end
+
   # Perform stage 2 (vidstabtransform filter)
   def smooth(_input, smooth, path)
     tx_path = "input=#{path}"

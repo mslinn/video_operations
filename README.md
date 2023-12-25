@@ -1,25 +1,26 @@
-# `Stabilize_video` [![Gem Version](https://badge.fury.io/rb/stabilize_video.svg)](https://badge.fury.io/rb/stabilize_video)
+# `Video_operations` [![Gem Version](https://badge.fury.io/rb/video_operations.svg)](https://badge.fury.io/rb/video_operations)
 
-`StabilizeVideo` provides the `stabilize` command, which uses `FFmpeg` to improve shakey videos.
-Provided as a Ruby Gem, `StabilizeVideo` exposes an API which can be invoked from other programs.
+`Video_operations` provides the `stabilize` command, which uses `FFmpeg` to improve shakey videos,
+and the `rotate` command, which uses FFmpeg to rotate a video.
+Provided as a Ruby Gem, `video_operations` exposes APIs that can be invoked from other programs.
 
 
 ## Installation
 
-To use the `stabilize` command from a console, type:
+To use the `rotate` and `stabilize` commands from a console, type:
 
 ```shell
-$ gem install stabilize_video
+$ gem install video_operations
 ```
 
 
 ### For a Ruby Program
 
-If you would like to use the API from your Ruby program,
+If you would like to use the APIs from your Ruby program,
 add the following line to your application&rsquo;s `Gemfile`:
 
 ```ruby
-gem 'stabilize_video'
+gem 'video_operations'
 ```
 
 And then execute:
@@ -31,11 +32,11 @@ $ bundle
 
 ### For a Ruby Gem
 
-If you would like to use the API from your Ruby gem,
+If you would like to use the APIs from your Ruby gem,
  add the following to your gem&rsquo;s `.gemspec`:
 
 ```ruby
-spec.add_dependency 'stabilize_video'
+spec.add_dependency 'video_operations'
 ```
 
 And then execute:
@@ -47,14 +48,22 @@ $ bundle
 
 ## Usage
 
-This is the help_stabilize message:
+This are the help messages:
+
+```shell
+$ rotate -h
+rotate: Rotates a video using FFmpeg.
+
+Syntax: rotate PATH_TO_VIDEO DEGREES
+
+Options:
+  -f Overwrite output file if present
+  -h Show this help message
+  -v Verbosity; one of: trace, debug, verbose, info, warning, error, fatal, panic, quiet
+```
 
 ```shell
 $ stabilize -h
-stabilize: Stabilizes a video using FFmpeg's vidstabdetect and vidstabtransform filters.
-
-Syntax: stabilize PATH_TO_VIDEO
-
 stabilize: Stabilizes a video using FFmpeg's vidstabdetect and vidstabtransform filters.
 
 Syntax: stabilize [Options] PATH_TO_VIDEO
