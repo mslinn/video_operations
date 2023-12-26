@@ -14,7 +14,7 @@
       "type": "rdbg"
     },
     {
-      "args": [ "jam_17_2023-12-22.mp4", "-90" ],
+      "args": [ "jam_17_2023-12-22.mp4", "90" ],
       "debugPort": "0",
       "env": {"VO_DEBUGGING": true},
       "name": "Run rotate",

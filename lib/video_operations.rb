@@ -88,10 +88,14 @@ class VideoOperations
     run command
   end
 
+  # To rotate and re-encode:
+  # ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf "rotate=#{rotation}" "#{@video_out}"
+  # To rotate without re-encoding:
+  # ffmpeg -y #{@loglevel} -i "#{@video_in}" -metadata:s:v rotate="#{rotation}" -codec copy "#{@video_out}"
   def rotate(degrees)
-    rotation = (degrees % 90).zero? ? "PI*#{degrees.to_i / 90}:bilinear=0" : "#{degrees}*(PI/180)"
+    rotation = (degrees % 90).zero? ? "PI*#{degrees.to_i / 90}:bilinear=0:oh=iw:ow=ih" : "#{degrees}*(PI/180)"
     command = <<~END_CMD
-      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf "rotate=#{rotation}" "#{@video_out}"
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -metadata:s:v rotate="#{rotation}" -acodec copy "#{@video_out}"
     END_CMD
     run command
   end
