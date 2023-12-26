@@ -9,6 +9,19 @@ def help(msg = nil)
   exit 1
 end
 
+def help_flip(msg = nil)
+  printf "Error: #{msg}\n\n".yellow unless msg.nil?
+  msg = <<~END_HELP
+    flip: Flips a video using FFmpeg.
+
+    Syntax: flip PATH_TO_VIDEO AXIS
+
+    AXIS can be 'h' (horizontal) or 'v' (vertical)
+  END_HELP
+  printf msg.cyan
+  exit 1
+end
+
 def help_rotate(msg = nil)
   printf "Error: #{msg}\n\n".yellow unless msg.nil?
   msg = <<~END_HELP
@@ -48,7 +61,15 @@ def help_stabilize(msg = nil)
 end
 
 def parse_options(command)
-  options = command == :stabilize ? { shake: 5, loglevel: 'warning' } : {}
+  options = case command
+            when :flip, :rotate
+              {}
+            when :stabilize
+              { shake: 5, loglevel: 'warning' }
+            else
+              help 'Error: Unknown command'
+            end
+
   OptionParser.new do |parser|
     parser.program_name = File.basename __FILE__
     @parser = parser
@@ -56,15 +77,19 @@ def parse_options(command)
     parser.on('-f', '--overwrite', 'Overwrite output file if present')
     parser.on('-l', '--loglevel LOGLEVEL', Integer, "Logging level (#{VERBOSITY.join ', '})")
     parser.on('-v', '--verbose VERBOSE', 'Zoom percentage')
+
     case command
     when :flip
+      # No options
     when :stabilize
       parser.on('-s', '--shake SHAKE', Integer, 'Shakiness (1..10)')
       parser.on('-z', '--zoom ZOOM', Integer, 'Zoom percentage')
     when :rotate
+      # No options
     else
       help 'Error: Unknown command'
     end
+
     parser.on_tail('-h', '--help', 'Show this message') do
       command == :stabilize ? help_stabilize : help_rotate
     end

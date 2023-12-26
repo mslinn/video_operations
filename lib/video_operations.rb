@@ -23,7 +23,7 @@ end
 #   shakiness: Set the shakiness of input video or quickness of camera.
 #              Default value is 5.
 #              Value range 1 (little shakiness) to 10 (very shaky).
-
+#
 # The second pass uses `transforms.trf` to produce a stable video output.
 # Use ffmpeg's unsharp filter for best results.
 # Options:
@@ -41,11 +41,11 @@ end
 #
 # Syntax:
 # stabilize filename
-
+#
 # Stage 1 (vidstabdetect filter)
 # The `-f null -` option tells ffmpeg to suppress the generation of an output video file
 # ffmpeg "$INPUT" -vf vidstabdetect $SUPPRESS_OUTPUT
-
+#
 # Analyze strongly shaky video and putting the results in file mytransforms.trf:
 # ffmpeg "$INPUT" -vf vidstabdetect=shakiness=10:${TRANSFORM_RESULTS} $SUPPRESS_OUTPUT
 # TODO: read from stdin if pipe detected
