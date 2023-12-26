@@ -61,15 +61,43 @@ def help_stabilize(msg = nil)
 end
 
 def parse_options(command)
-  options = case command
-            when :flip, :rotate
-              {}
-            when :stabilize
-              { shake: 5, loglevel: 'warning' }
-            else
-              help 'Error: Unknown command'
-            end
+  options = option_defaults command
+  opts = do_parse command
+  begin
+    opts.order!(into: options)
+  rescue OptionParser::InvalidOption => e # Handle negative rotation values, which look like options
+    raise e unless command == :rotate
 
+    begin
+      !Float(ARGV[0]).nil? # If not a negative number then this is an invalid option
+    rescue StandardError
+      raise e
+    end
+  end
+
+  help_stabilize "Invalid verbosity value (#{options[:verbose]}), must be one of one of: #{VERBOSITY.join ', '}." \
+    if options[:verbose] && !options[:verbose] in VERBOSITY
+
+  help_stabilize "Invalid shake value (#{options[:shake]})." \
+    if command == :stabilize && (options[:shake].negative? || options[:shake] > 10)
+
+  options
+end
+
+private
+
+def option_defaults(command)
+  case command
+  when :flip, :rotate
+    { loglevel: 'warning' }
+  when :stabilize
+    { shake: 5, loglevel: 'warning' }
+  else
+    help 'Error: Unknown command'
+  end
+end
+
+def do_parse(command)
   OptionParser.new do |parser|
     parser.program_name = File.basename __FILE__
     @parser = parser
@@ -80,12 +108,12 @@ def parse_options(command)
 
     case command
     when :flip
-      # No options
+    # No options
     when :stabilize
       parser.on('-s', '--shake SHAKE', Integer, 'Shakiness (1..10)')
       parser.on('-z', '--zoom ZOOM', Integer, 'Zoom percentage')
     when :rotate
-      # No options
+    # No options
     else
       help 'Error: Unknown command'
     end
@@ -93,13 +121,5 @@ def parse_options(command)
     parser.on_tail('-h', '--help', 'Show this message') do
       command == :stabilize ? help_stabilize : help_rotate
     end
-  end.parse!(into: options)
-
-  help_stabilize "Invalid verbosity value (#{options[:verbose]}), must be one of one of: #{VERBOSITY.join ', '}." \
-    if options[:verbose] && !options[:verbose] in VERBOSITY
-
-  help_stabilize "Invalid shake value (#{options[:shake]})." \
-    if command == :stabilize && (options[:shake].negative? || options[:shake] > 10)
-
-  options
+  end
 end

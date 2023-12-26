@@ -89,9 +89,9 @@ class VideoOperations
   end
 
   def rotate(degrees)
-    rotation = (degrees % 90).zero? ? "PI*#{degrees / 90}:bilinear=0" : "#{degrees}*(PI/180)"
+    rotation = (degrees % 90).zero? ? "PI*#{degrees.to_i / 90}:bilinear=0" : "#{degrees}*(PI/180)"
     command = <<~END_CMD
-      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf 'rotate=#{rotation} "#{@video_out}"
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf "rotate=#{rotation}" "#{@video_out}"
     END_CMD
     run command
   end
