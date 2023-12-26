@@ -1,15 +1,19 @@
 require 'colorator'
-require_relative 'video_operations/version'
 require_relative 'options'
-
-# Require all Ruby files in 'lib/', except this file
-Dir[File.join(__dir__, '*.rb')].each do |file|
-  require file unless file.end_with?('/common.rb')
-end
 
 def common(command)
   @options = parse_options command
   help_stabilize 'Video file name must be provided.' if ARGV.empty?
+end
+
+def flip
+  common :flip
+  help_flip "Too many parameters specified.\n#{ARGV}" if ARGV.length > 2
+  video_in = ARGV[0]
+  direction = ARGV[1]
+  help_flip 'Flip direction must either be h or v' unless %w[h v].include? direction
+  video_out = "#{File.dirname video_in}/flipped_#{File.basename video_in}"
+  VideoOperations.new(video_in, video_out, **@options).flip(direction)
 end
 
 def rotate

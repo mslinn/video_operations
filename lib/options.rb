@@ -3,6 +3,12 @@ require 'optparse'
 
 VERBOSITY = %w[trace debug verbose info warning error fatal panic quiet].freeze
 
+def help(msg = nil)
+  printf "Error: #{msg}\n\n".yellow unless msg.nil?
+  printf 'Commands are: flip, rotate and stabilize'
+  exit 1
+end
+
 def help_rotate(msg = nil)
   printf "Error: #{msg}\n\n".yellow unless msg.nil?
   msg = <<~END_HELP
@@ -48,18 +54,19 @@ def parse_options(command)
     @parser = parser
 
     parser.on('-f', '--overwrite', 'Overwrite output file if present')
-    parser.on('-h', '--help', 'Display help') do
-      command == :stabilize ? help_stabilize : help_rotate
-    end
     parser.on('-l', '--loglevel LOGLEVEL', Integer, "Logging level (#{VERBOSITY.join ', '})")
     parser.on('-v', '--verbose VERBOSE', 'Zoom percentage')
-    if command == :stabilize
+    case command
+    when :flip
+    when :stabilize
       parser.on('-s', '--shake SHAKE', Integer, 'Shakiness (1..10)')
       parser.on('-z', '--zoom ZOOM', Integer, 'Zoom percentage')
+    when :rotate
+    else
+      help 'Error: Unknown command'
     end
-    parser.on_tail('-h', '--help_stabilize', 'Show this message') do
-      puts parser.to_s.cyan
-      exit
+    parser.on_tail('-h', '--help', 'Show this message') do
+      command == :stabilize ? help_stabilize : help_rotate
     end
   end.parse!(into: options)
 

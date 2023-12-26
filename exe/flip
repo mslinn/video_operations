@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'video_operations'
+if ENV['VO_DEBUGGING']
+  require_relative '../lib/video_operations'
+else
+  require 'video_operations'
+end
 
 flip

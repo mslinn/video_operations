@@ -2,9 +2,14 @@ require 'colorator'
 require 'fileutils'
 require 'optparse'
 require 'tempfile'
-require_relative 'arithmetic'
-require_relative 'run'
-require_relative 'msutil'
+
+# Require all Ruby files in 'lib/', except this file
+Dir[File.join(__dir__, '*.rb')].each do |file|
+  unless file.end_with? File.basename(__FILE__)
+    # puts "Requiring #{file}"
+    require file
+  end
+end
 
 # Ffmpeg's `deshake` filter can be used for a single-pass shake removal.
 # This script does not do that.
@@ -73,6 +78,33 @@ class VideoOperations
     exit 3
   end
 
+  def flip(hflip: false, vflip: true)
+    flips = 'hflip' if hflip
+    flips += ',' if hflip && vflip
+    flips += 'vflip' if vflip
+    command = <<~END_CMD
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf '#{flips}' "#{@video_out}"
+    END_CMD
+    run command
+  end
+
+  def rotate(degrees)
+    rotation = (degrees % 90).zero? ? "PI*#{degrees / 90}:bilinear=0" : "#{degrees}*(PI/180)"
+    command = <<~END_CMD
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf 'rotate=#{rotation} "#{@video_out}"
+    END_CMD
+    run command
+  end
+
+  # Perform stage 2 (vidstabtransform filter)
+  def smooth(smooth, path)
+    tx_path = "input=#{path}"
+    command = <<~END_CMD
+      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf vidstabtransform=#{smooth}:zoom=5:#{tx_path} "#{@video_out}"
+    END_CMD
+    run command
+  end
+
   def stabilize
     smooth = compute_smoothing
     Tempfile.open('transforms', '/tmp') do |fio|
@@ -102,32 +134,5 @@ class VideoOperations
 
     result = calculate "#{fraction}/2"
     "smoothing=#{result.to_i}"
-  end
-
-  def flip(hflip: false, vflip: true)
-    flips = 'hflip' if hflip
-    flips += ',' if hflip && vflip
-    flips += 'vflip' if vflip
-    command = <<~END_CMD
-      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf '#{flips}' "#{@video_out}"
-    END_CMD
-    run command
-  end
-
-  def rotate(degrees)
-    rotation = if degrees % 90 == 0 ? "PI*#{degrees / 90}:bilinear=0" : "#{degrees}*(PI/180)"
-    command = <<~END_CMD
-      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf 'rotate=#{rotation} "#{@video_out}"
-    END_CMD
-    run command
-  end
-
-  # Perform stage 2 (vidstabtransform filter)
-  def smooth(_input, smooth, path)
-    tx_path = "input=#{path}"
-    command = <<~END_CMD
-      ffmpeg -y #{@loglevel} -i "#{@video_in}" -vf vidstabtransform=#{smooth}:zoom=5:#{tx_path} "#{@video_out}"
-    END_CMD
-    run command
   end
 end
